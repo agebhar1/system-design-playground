@@ -1,0 +1,43 @@
+---
+- name: Ensure package is present.
+  community.general.zypper:
+    name:
+      - cronie
+      - logrotate
+    state: present
+  become: true
+
+- name: Ensure required directories are present.
+  ansible.builtin.file:
+    dest: "{{ item.dest }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - { dest: "{{ logrotate_user_home }}/etc/logrotate.d/daily.d" }
+    - { dest: "{{ logrotate_user_home }}/var/lib/logrotate" }
+    - { dest: "{{ logrotate_user_home }}/var/log" }
+
+- name: Ensure logrotation configuration is present.
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "0600"
+  loop:
+    - { src: "daily.conf.j2", dest: "{{ logrotate_user_home }}/etc/logrotate.d/daily.conf" }
+    - { src: "logrotate.j2", dest: "{{ logrotate_user_home }}/etc/logrotate.d/daily.d/logrotate" }
+
+- name: Ensure logrotate's daily execution of all `etc/logrotate.d/daily.d/*`.
+  ansible.builtin.cron:
+    name: "daily logrotate"
+    special_time: daily
+    # yamllint disable-line rule:line-length
+    job: "/usr/sbin/logrotate {{ logrotate_user_home }}/etc/logrotate.d/daily.conf --state {{ logrotate_user_home }}/var/lib/logrotate/daily.status --log {{ logrotate_user_home }}/var/log/logrotate-daily.log"
+    state: present
+
+- name: Ensure cron service is running.
+  ansible.builtin.systemd:
+    name: cron
+    daemon_reload: true
+    enabled: true
+    state: started
+  become: true

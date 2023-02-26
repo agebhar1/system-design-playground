@@ -1,0 +1,12 @@
+{{ nginx_user_home }}/var/log/nginx/*.log {
+  daily
+  missingok
+  rotate {{ nginx_logrotate_rotate }}
+  dateext
+  dateformat -%Y-%m-%d
+  nocreate
+  sharedscripts
+  postrotate
+    test ! -r {{ nginx_user_home }}/var/run/nginx.pid || kill -USR1 $(cat {{ nginx_user_home }}/var/run/nginx.pid)
+  endscript
+}

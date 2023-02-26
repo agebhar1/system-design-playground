@@ -1,0 +1,16 @@
+---
+nginx:
+  version: 1.23.3
+  checksum: sha256:75cb5787dbb9fae18b14810f91cc4343f64ce4c24e27302136fb52498042ba54
+
+modsecurity:
+  version: 3.0.8
+  checksum: sha256:e241c89b3cd7e58a863d0d0d6b9b8ba4d33ffb0f51171044c258c62e3e7956c7
+
+modsecurity_nginx:
+  version: 1.0.3
+  checksum: sha256:ae811c7208ac029cb7a99d6f63e03d3971797607517187f47620df39c1f78add
+
+owasp_modsecurity_crs:
+  version: 3.3.4
+  checksum: sha256:15a84aaa041aa532905a34546b613bd3aed122e3f9814fbb5c28e1655d02b74d

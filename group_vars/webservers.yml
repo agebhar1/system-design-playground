@@ -1,0 +1,8 @@
+---
+nginx_core_module:
+  use: epoll
+  worker_connections: 1024
+  worker_processes: 2
+
+owasp_modsecurity_crs_rules_disabled:
+  - REQUEST-910-IP-REPUTATION

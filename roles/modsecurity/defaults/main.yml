@@ -1,0 +1,15 @@
+---
+modsecurity:
+  version: null
+  checksum: null
+
+modsecurity_user: "{{ ansible_user }}"
+modsecurity_user_home: "{{ ansible_user_dir }}"
+modsecurity_src_directory: "{{  modsecurity_user_home }}/src"
+modsecurity_dist_directory: "{{  modsecurity_user_home }}"
+
+modsecurity_configuration:
+  - --enable-parser-generation
+  - --with-lmdb
+  - --with-lua
+  - --with-yajl

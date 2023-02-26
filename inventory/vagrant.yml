@@ -1,0 +1,32 @@
+---
+all:
+  hosts:
+    titan:
+      ansible_host: 192.168.56.2
+      ansible_user: vagrant
+      ansible_ssh_private_key_file: .vagrant/machines/titan/virtualbox/private_key
+      ansible_python_interpreter: /usr/bin/python3.6
+      vagrant:
+        vm:
+          box: opensuse/Leap-15.4.x86_64
+          cpus: 3
+          memory: 4096
+          gui: false
+
+    rhea:
+      ansible_host: 192.168.56.3
+      ansible_user: vagrant
+      ansible_ssh_private_key_file: .vagrant/machines/rhea/virtualbox/private_key
+      ansible_python_interpreter: /usr/bin/python3.6
+      vagrant:
+        vm:
+          box: opensuse/Leap-15.3.x86_64
+          cpus: 3
+          memory: 4096
+          gui: false
+
+  children:
+    webservers:
+      hosts:
+        titan:
+        rhea:

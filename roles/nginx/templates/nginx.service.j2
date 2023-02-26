@@ -1,0 +1,19 @@
+[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+UMask=0077
+PIDFile={{ nginx_user_home }}/var/run/nginx.pid
+Environment="LD_LIBRARY_PATH={{ nginx_user_home }}/lib"
+ExecStartPre={{ nginx_user_home }}/sbin/nginx -t
+ExecStart={{ nginx_user_home }}/sbin/nginx
+ExecReload={{ nginx_user_home }}/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+Restart=always
+
+[Install]
+WantedBy=default.target

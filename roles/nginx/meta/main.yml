@@ -1,0 +1,3 @@
+---
+dependencies:
+  - role: owasp_modsecurity_crs

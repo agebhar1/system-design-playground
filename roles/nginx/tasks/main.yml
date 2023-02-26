@@ -1,0 +1,190 @@
+---
+- name: Ensure build dependencies are present.
+  community.general.zypper:
+    name:
+      - gcc
+      - gcc-c++
+      - libopenssl-1_1-devel
+      - make
+      - patch
+      - pcre-devel
+      - zlib-devel
+    state: present
+  become: true
+
+- name: Ensure required directories are present.
+  ansible.builtin.file:
+    dest: "{{ item.dest }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - { dest: "{{ nginx_src_directory }}/download" }
+    - { dest: "{{ nginx_src_directory }}/modsecurity-nginx/{{ modsecurity_nginx.version }}" }
+    - { dest: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}" }
+    - { dest: "{{ nginx_user_home }}/.config/systemd/user" }
+    - { dest: "{{ nginx_user_home }}/etc/logrotate.d/daily.d" }
+    - { dest: "{{ nginx_user_home }}/etc/nginx/conf.d" }
+    - { dest: "{{ nginx_user_home }}/etc/nginx/vhosts" }
+    - { dest: "{{ nginx_user_home }}/var/log/nginx" }
+    - { dest: "{{ nginx_user_home }}/var/run/nginx/client_body_temp" }
+    - { dest: "{{ nginx_user_home }}/var/run/nginx/proxy_temp" }
+
+- name: Ensure source is present.
+  ansible.builtin.get_url:
+    url: https://nginx.org/download/nginx-{{ nginx.version }}.tar.gz
+    dest: "{{ nginx_src_directory }}/download/nginx-{{ nginx.version }}.tar.gz"
+    checksum: "{{ nginx.checksum }}"
+    mode: "0600"
+
+- name: Ensure source is extracted.
+  ansible.builtin.unarchive:
+    src: "{{ nginx_src_directory }}/download/nginx-{{ nginx.version }}.tar.gz"
+    dest: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
+    creates: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}/configure"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    mode: u=rwX,g=,o=
+
+- name: Ensure patches are applied.
+  ansible.posix.patch:
+    src: "{{ item }}"
+    basedir: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
+    strip: 1
+  with_fileglob: files/nginx/{{ nginx.version }}/patches/*.patch
+
+- name: Ensure »Nginx ModSecurity Module« source is present.
+  ansible.builtin.get_url:
+    # yamllint disable-line rule:line-length
+    url: https://github.com/SpiderLabs/ModSecurity-nginx/releases/download/v{{ modsecurity_nginx.version }}/modsecurity-nginx-v{{ modsecurity_nginx.version }}.tar.gz
+    dest: "{{ nginx_src_directory }}/download/modsecurity-nginx-v{{ modsecurity_nginx.version }}.tar.gz"
+    checksum: "{{ modsecurity_nginx.checksum }}"
+    mode: "0600"
+
+- name: Ensure »Nginx ModSecurity Module« source is extracted.
+  ansible.builtin.unarchive:
+    src: "{{ nginx_src_directory }}/download/modsecurity-nginx-v{{ modsecurity_nginx.version }}.tar.gz"
+    dest: "{{ nginx_src_directory }}/modsecurity-nginx/{{ modsecurity_nginx.version }}"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    mode: u=rwX,g=,o=
+
+- name: Fetch latest configuration hash.
+  ansible.builtin.slurp:
+    src: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}/.ansible"
+  ignore_errors: true
+  register: nginx_build_configuration_latest_hash
+
+- name: Check if './configure' must be executed.
+  ansible.builtin.set_fact:
+    nginx_build_configuration_changed: |
+      {{ 'content' not in nginx_build_configuration_latest_hash or
+         (nginx_build_configuration | sort | md5) != (nginx_build_configuration_latest_hash['content'] | b64decode) }}
+
+- name: Ensure latest build configuration is applied.
+  when: nginx_build_configuration_changed
+  block:
+    - name: Run './configure'.
+      ansible.builtin.command:
+        argv: "{{ ['./configure'] + configuration + nginx_build_configuration }}"
+        chdir: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
+      vars:
+        configuration:
+          - --with-cc-opt=-I/usr/include -I{{ nginx_user_home }}/include
+          - --with-ld-opt=-L/usr/lib64 -L{{ nginx_user_home }}/lib -ldl -Wl,-rpath,/usr/lib64
+          - --conf-path={{ nginx_user_home }}/etc/nginx/nginx.conf
+          - --error-log-path={{ nginx_user_home }}/var/log/nginx/error.log
+          - --http-client-body-temp-path={{ nginx_user_home }}/var/run/nginx/client_body_temp
+          - --http-log-path={{ nginx_user_home }}/var/log/nginx/access.log
+          - --http-proxy-temp-path={{ nginx_user_home }}/var/run/nginx/proxy_temp
+          - --lock-path={{ nginx_user_home }}/var/lock/nginx.lock
+          - --modules-path={{ nginx_user_home }}/etc/nginx/
+          - --pid-path={{ nginx_user_home }}/var/run/nginx.pid
+          - --prefix={{ nginx_user_home }}/var/www
+          - --sbin-path={{ nginx_user_home }}/sbin/nginx
+      tags:
+        - skip_ansible_lint
+
+    - name: Save current configuration hash.
+      ansible.builtin.copy:
+        content: "{{ nginx_build_configuration | sort | md5 }}"
+        dest: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}/.ansible"
+        mode: "0600"
+
+- name: Ensure artifacts are build.
+  community.general.make:
+    chdir: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
+    jobs: "{{ (ansible_processor_nproc * 0.75) | round(0, 'floor') | int }}"
+  register: nginx_make
+
+- name: Ensure artifacts are present.
+  # noqa: no-handler
+  community.general.make:
+    chdir: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
+    target: install
+  when: nginx_make.changed
+  notify: nginx changed
+
+- name: Ensure latest configuration is present.
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_user_home }}/etc/nginx/nginx.conf"
+    mode: "0600"
+  notify: nginx changed
+
+- name: Ensure configuration files are present in `etc/nginx/conf.d`.
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ nginx_user_home }}/etc/nginx/conf.d"
+    mode: "0600"
+  notify: nginx changed
+  loop: "{{ nginx_confd_files }}"
+
+- name: Ensure configuration templates are present in `etc/nginx/conf.d`.
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ nginx_user_home }}/etc/nginx/conf.d/{{ item | basename | splitext | first }}"
+    mode: "0600"
+  notify: nginx changed
+  loop: "{{ nginx_confd_templates }}"
+
+- name: Ensure virtual host files are present in `etc/nginx/vhosts`.
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ nginx_user_home }}/etc/nginx/vhosts"
+    mode: "0600"
+  notify: nginx changed
+  loop: "{{ nginx_vhosts_files }}"
+
+- name: Ensure virtual host templates are present in `etc/nginx/vhosts`.
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ nginx_user_home }}/etc/nginx/vhosts/{{ item | basename | splitext | first }}"
+    mode: "0600"
+  notify: nginx changed
+  loop: "{{ nginx_vhosts_templates }}"
+
+- name: Ensure logrotation configuration is present.
+  ansible.builtin.template:
+    src: nginx.j2
+    dest: "{{ nginx_user_home }}/etc/logrotate.d/daily.d/nginx"
+    mode: "0600"
+
+- name: Ensure systemd user service file.
+  ansible.builtin.template:
+    src: nginx.service.j2
+    dest: "{{ nginx_user_home }}/.config/systemd/user/nginx.service"
+    mode: "0600"
+  notify: nginx changed
+
+- name: Check if user is lingering.
+  ansible.builtin.stat:
+    path: /var/lib/systemd/linger/{{ nginx_user }}
+  register: user_lingering
+
+- name: Enable user lingering.
+  ansible.builtin.command: loginctl enable-linger {{ nginx_user }}
+  when: not user_lingering.stat.exists
+  changed_when: true
+  become: true

@@ -1,0 +1,74 @@
+---
+- name: Ensure required directories are present
+  ansible.builtin.file:
+    dest: "{{ item.dest }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - { dest: "{{ owasp_modsecurity_crs_src_directory }}/download" }
+    - { dest: "{{ owasp_modsecurity_crs_src_directory }}/owasp-modsecurity-crs/{{ owasp_modsecurity_crs.version }}" }
+    - { dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs" }
+
+- name: Ensure source is present.
+  ansible.builtin.get_url:
+    url: https://github.com/coreruleset/coreruleset/archive/refs/tags/v{{ owasp_modsecurity_crs.version }}.tar.gz
+    dest: "{{ owasp_modsecurity_crs_src_directory }}/download/owasp-modsecurity-crs-{{ owasp_modsecurity_crs.version }}.tar.gz"
+    checksum: "{{ owasp_modsecurity_crs.checksum }}"
+    mode: "0600"
+
+- name: Ensure source is extracted.
+  ansible.builtin.unarchive:
+    src: "{{ owasp_modsecurity_crs_src_directory }}/download/owasp-modsecurity-crs-{{ owasp_modsecurity_crs.version }}.tar.gz"
+    dest: "{{ owasp_modsecurity_crs_src_directory }}/owasp-modsecurity-crs/{{ owasp_modsecurity_crs.version }}"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    mode: u=rwX,g=,o=
+
+- name: Ensure rules are present.
+  ansible.builtin.copy:
+    src: "{{ owasp_modsecurity_crs_src_directory }}/owasp-modsecurity-crs/{{ owasp_modsecurity_crs.version }}/rules"
+    dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs/"
+    remote_src: true
+    mode: u=rwX,g=,o=
+
+- name: Ensure exclusion rules are present.
+  ansible.builtin.copy:
+    src: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs/rules/{{ item }}.conf.example"
+    dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs/rules/{{ item }}.conf"
+    remote_src: true
+    mode: "0600"
+  loop:
+    - REQUEST-900-EXCLUSION-RULES-BEFORE-CRS
+    - RESPONSE-999-EXCLUSION-RULES-AFTER-CRS
+
+- name: Ensure setup configuration is present.
+  ansible.builtin.copy:
+    src: "{{ owasp_modsecurity_crs_src_directory }}/owasp-modsecurity-crs/{{ owasp_modsecurity_crs.version }}/crs-setup.conf.example"
+    dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs/crs-setup.conf"
+    remote_src: true
+    mode: "0600"
+
+- name: Ensure recommended ModSecurity configuration is present.
+  ansible.builtin.copy:
+    # https://github.com/SpiderLabs/ModSecurity/blob/v3/master/modsecurity.conf-recommended
+    src: recommended.conf
+    dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/recommended.conf"
+    mode: "0600"
+
+- name: Ensure required ModSecurity files are present.
+  ansible.builtin.copy:
+    # https://raw.githubusercontent.com/SpiderLabs/ModSecurity/v3/master/unicode.mapping
+    src: "{{ item }}"
+    dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/{{ item }}"
+    mode: "0600"
+  loop:
+    - unicode.mapping
+
+- name: Ensure single ModSecurity configuration is present.
+  ansible.builtin.template:
+    src: modsecurity.conf.j2
+    dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity.conf"
+    mode: "0600"
+  vars:
+    rules: "{{ owasp_modsecurity_crs_rules | difference(owasp_modsecurity_crs_rules_disabled) }}"

@@ -1,0 +1,9 @@
+---
+- name: Reload iptables service
+  ansible.builtin.systemd:
+    name: iptables
+    daemon_reload: true
+    enabled: true
+    state: reloaded
+  listen: iptables changed
+  become: true

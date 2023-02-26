@@ -1,0 +1,47 @@
+# http://nginx.org/en/docs/ngx_core_module.html
+
+{% if nginx_core_module.error_log_level is defined and nginx_core_module.error_log_level and nginx_core_module.error_log_level != 'error' %}
+error_log {{ nginx_user_home }}/var/log/nginx/error.log {{ nginx_core_module.error_log_level }};
+{% else %}
+# error_log {{ nginx_user_home }}/var/log/nginx/error.log error;
+{% endif -%}
+
+# lock_file {{ nginx_user_home }}/var/lock/nginx.lock;
+# pid {{ nginx_user_home }}/var/run/nginx.pid;
+
+{% if nginx_core_module.env is defined and nginx_core_module.env %}
+{% for value in nginx_core_module.env %}
+env {{ value }};
+{% endfor %}
+{% endif %}
+
+{% for directive in ['daemon', 'debug_points', 'master_process', 'pcre_jit', 'ssl_engine', 'thread_pool',
+                     'timer_resolution', 'worker_cpu_affinity', 'worker_priority', 'worker_processes',
+                     'worker_rlimit_core', 'worker_rlimit_nofile', 'worker_shutdown_timeout'] %}
+{% if nginx_core_module[directive] is defined and nginx_core_module[directive] %}
+{{ directive }} {{ nginx_core_module[directive] }};
+{% endif %}
+{% endfor %}
+
+events {
+{% for directive in ['accept_mutex', 'accept_mutex_delay', 'multi_accept', 'use', 'worker_aio_requests', 'worker_connections'] %}
+{% if nginx_core_module[directive] is defined and nginx_core_module[directive] %}
+    {{ directive }} {{ nginx_core_module[directive] }};
+{% endif %}
+{% endfor -%}
+
+{% if nginx_core_module.debug_connection is defined and nginx_core_module.debug_connection %}
+{% for connection in nginx_core_module.debug_connection %}
+    debug_connection {{ connection }};
+{% endfor %}
+{% endif %}
+}
+
+include conf.d/*.conf;
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    include vhosts/*.conf;
+}

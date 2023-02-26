@@ -1,0 +1,25 @@
+---
+- name: Reload Nginx user service
+  ansible.builtin.debug:
+    msg: "check config first"
+  listen: nginx changed
+  changed_when: true
+  notify:
+    - Check Nginx configuration
+    - Reload Nginx user service after configuration check
+
+- name: Check Nginx configuration
+  ansible.builtin.command: "{{ nginx_user_home }}/sbin/nginx -t"
+  environment:
+    LD_LIBRARY_PATH: "{{ nginx_user_home }}/lib"
+  register: result
+  changed_when: "result.rc != 0"
+  check_mode: false
+
+- name: Reload Nginx user service after configuration check
+  ansible.builtin.systemd:
+    name: nginx
+    daemon_reload: true
+    enabled: true
+    scope: user
+    state: reloaded

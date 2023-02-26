@@ -1,0 +1,8 @@
+{{ logrotate_user_home }}/var/log/logrotate-*.log {
+  daily
+  missingok
+  rotate {{ logrotate_rotate }}
+  dateext
+  dateformat -%Y-%m-%d
+  nocreate
+}

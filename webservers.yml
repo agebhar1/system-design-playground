@@ -1,0 +1,8 @@
+---
+- name: Web Servers
+  hosts: webservers
+
+  roles:
+    - role: nginx
+    - role: logrotate
+    - role: iptables

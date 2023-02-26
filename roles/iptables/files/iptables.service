@@ -1,0 +1,15 @@
+[Unit]
+Description=IPtables
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/sbin/iptables-restore --test /etc/iptables/rules
+ExecStart=/usr/sbin/iptables-restore /etc/iptables/rules
+ExecReload=/bin/sh -c '/usr/sbin/iptables-restore --test /etc/iptables/rules && \
+    /usr/lib/systemd/scripts/iptables-flush && \
+    /usr/sbin/iptables-restore /etc/iptables/rules'
+ExecStop=/usr/lib/systemd/scripts/iptables-flush
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

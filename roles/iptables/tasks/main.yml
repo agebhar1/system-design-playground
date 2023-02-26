@@ -1,0 +1,38 @@
+---
+- name: IPtables
+  become: true
+  block:
+    - name: Ensure required packages are present.
+      community.general.zypper:
+        name:
+          - iptables
+        state: present
+
+    - name: Ensure required directories are present.
+      ansible.builtin.file:
+        dest: "{{ item.dest }}"
+        state: directory
+        mode: "{{ item.mode }}"
+      loop:
+        - { dest: "/etc/iptables", mode: "0700" }
+        - { dest: "/usr/lib/systemd/scripts", mode: "0755" }
+
+    - name: Ensure »IPtables« systemd service script(s).
+      ansible.builtin.copy:
+        src: iptables-flush
+        dest: /usr/lib/systemd/scripts/
+        mode: "0755"
+
+    - name: Ensure »IPtables« systemd service file.
+      ansible.builtin.copy:
+        src: iptables.service
+        dest: /usr/lib/systemd/system/
+        mode: "0644"
+      notify: iptables changed
+
+    - name: Ensure »IPtables« rules.
+      ansible.builtin.template:
+        src: rules.j2
+        dest: /etc/iptables/rules
+        mode: "0600"
+      notify: iptables changed
