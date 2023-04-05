@@ -1,7 +1,7 @@
 ---
 nginx:
-  version: 1.23.3
-  checksum: sha256:75cb5787dbb9fae18b14810f91cc4343f64ce4c24e27302136fb52498042ba54
+  version: 1.23.4
+  checksum: sha256:d43300e36bb249a7e6edc60bca1b0fc372a0bafce2f346d76acfb677a8790fc0
 
 modsecurity:
   version: 3.0.8
