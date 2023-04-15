@@ -1,0 +1,414 @@
+diff -urN a/build/ax_check_pcre2.m4 b/build/ax_check_pcre2.m4
+--- a/build/ax_check_pcre2.m4	1970-01-01 01:00:00.000000000 +0100
++++ b/build/ax_check_pcre2.m4	2023-04-15 14:46:24.340368120 +0200
+@@ -0,0 +1,172 @@
++# ===========================================================================
++#      https://www.gnu.org/software/autoconf-archive/ax_check_pcre2.html
++# ===========================================================================
++#
++# SYNOPSIS
++#
++#   AX_CHECK_PCRE2([bits], [action-if-found], [action-if-not-found])
++#
++# DESCRIPTION
++#
++#   Search for an installed libpcre2-8 library. If nothing was specified
++#   when calling configure, it searches first in /usr/local and then in
++#   /usr, /opt/local and /sw. If the --with-pcre2=DIR is specified, it will
++#   try to find it in DIR/include/pcre2.h and DIR/lib/libpcre2-8. If
++#   --without-pcre2 is specified, the library is not searched at all.
++#
++#   If 'bits' is empty or '8', PCRE2 8-bit character support is checked
++#   only. If 'bits' contains '16', PCRE2 8-bit and 16-bit character support
++#   are checked. If 'bits' contains '32', PCRE2 8-bit and 32-bit character
++#   support are checked. When 'bits' contains both '16' and '32', PCRE2
++#   8-bit, 16-bit, and 32-bit character support is checked.
++#
++#   If either the header file (pcre2.h), or the library (libpcre2-8) is not
++#   found, or the specified PCRE2 character bit width is not supported,
++#   shell commands 'action-if-not-found' is run. If 'action-if-not-found' is
++#   not specified, the configuration exits on error, asking for a valid
++#   PCRE2 installation directory or --without-pcre2.
++#
++#   If both header file and library are found, and the specified PCRE2 bit
++#   widths are supported, shell commands 'action-if-found' is run. If
++#   'action-if-found' is not specified, the default action appends
++#   '-I${PCRE2_HOME}/include' to CPFLAGS, appends '-L$PCRE2_HOME}/lib' to
++#   LDFLAGS, prepends '-lpcre2-8' to LIBS, and calls AC_DEFINE(HAVE_PCRE2).
++#   You should use autoheader to include a definition for this symbol in a
++#   config.h file. Sample usage in a C/C++ source is as follows:
++#
++#     #ifdef HAVE_PCRE2
++#     #define PCRE2_CODE_UNIT_WIDTH 8
++#     #include <pcre2.h>
++#     #endif /* HAVE_PCRE2 */
++#
++# LICENSE
++#
++#   Copyright (c) 2020 Robert van Engelen <engelen@acm.org>
++#
++#   This program is free software; you can redistribute it and/or modify it
++#   under the terms of the GNU General Public License as published by the
++#   Free Software Foundation; either version 2 of the License, or (at your
++#   option) any later version.
++#
++#   This program is distributed in the hope that it will be useful, but
++#   WITHOUT ANY WARRANTY; without even the implied warranty of
++#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
++#   Public License for more details.
++#
++#   You should have received a copy of the GNU General Public License along
++#   with this program. If not, see <https://www.gnu.org/licenses/>.
++#
++#   As a special exception, the respective Autoconf Macro's copyright owner
++#   gives unlimited permission to copy, distribute and modify the configure
++#   scripts that are the output of Autoconf when processing the Macro. You
++#   need not follow the terms of the GNU General Public License when using
++#   or distributing such scripts, even though portions of the text of the
++#   Macro appear in them. The GNU General Public License (GPL) does govern
++#   all other use of the material that constitutes the Autoconf Macro.
++#
++#   This special exception to the GPL applies to versions of the Autoconf
++#   Macro released by the Autoconf Archive. When you make and distribute a
++#   modified version of the Autoconf Macro, you may extend this special
++#   exception to the GPL to apply to your modified version as well.
++
++# This is the original upstream check for pcre2 from autoconf-archive website,
++# with these changes:
++# - instead of HAVE_PCRE2 -> WITH_PCRE2 to maintain compatibility
++# - changed CPPFLAGS, LDFLAGS and LIBS to be prefixed with PCRE2_, and do not
++#   concat with previous definitions
++
++#serial 2
++
++AC_DEFUN([AX_CHECK_PCRE2],
++#
++# Handle user hints
++#
++[AC_MSG_CHECKING(if PCRE2 is wanted)
++pcre2_places="/usr/local /usr /opt/local /sw"
++AC_ARG_WITH([pcre2],
++[  --with-pcre2=DIR        root directory path of PCRE2 installation @<:@defaults to
++                          /usr/local or /usr if not found in /usr/local@:>@
++  --without-pcre2         to disable PCRE2 usage completely],
++[if test "$withval" != "no" ; then
++  AC_MSG_RESULT(yes)
++  if test -d "$withval"
++  then
++    pcre2_places="$withval $pcre2_places"
++  else
++    AC_MSG_WARN([Sorry, $withval does not exist, checking usual places])
++  fi
++else
++  pcre2_places=""
++  AC_MSG_RESULT(no)
++fi],
++[AC_MSG_RESULT(yes)])
++#
++# Locate PCRE2, if wanted
++#
++if test -n "${pcre2_places}"
++then
++  # check the user supplied or any other more or less 'standard' place:
++  #   Most UNIX systems      : /usr/local and /usr
++  #   MacPorts / Fink on OSX : /opt/local respectively /sw
++  for PCRE2_HOME in ${pcre2_places} ; do
++    if test -f "${PCRE2_HOME}/include/pcre2.h"; then break; fi
++    PCRE2_HOME=""
++  done
++
++  PCRE2_OLD_LDFLAGS=$LDFLAGS
++  PCRE2_OLD_CPPFLAGS=$CPPFLAGS
++  if test -n "${PCRE2_HOME}"; then
++    PCRE2_LDFLAGS="-L${PCRE2_HOME}/lib"
++    PCRE2_CFLAGS="-I${PCRE2_HOME}/include"
++  fi
++  AC_LANG_PUSH([C])
++  AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [pcre2_cv_libpcre2=yes], [pcre2_cv_libpcre2=no])
++  AC_CHECK_HEADER([pcre2.h], [pcre2_cv_pcre2_h=yes], [pcre2_cv_pcre2_h=no], [#define PCRE2_CODE_UNIT_WIDTH 8])
++  case "$1" in
++  *16*)
++    AC_CHECK_LIB([pcre2-16], [pcre2_compile_16], [pcre2_cv_libpcre2_16=yes], [pcre2_cv_libpcre2_16=no])
++    AC_CHECK_HEADER([pcre2.h], [pcre2_cv_pcre2_16_h=yes], [pcre2_cv_pcre2_16_h=no], [#define PCRE2_CODE_UNIT_WIDTH 16])
++    if test "$pcre2_cv_libpcre2_16" = "no" || test "$pcre2_cv_pcre2_16_h" = "no"; then
++      pcre2_cv_libpcre2=no
++    fi
++    ;;
++  esac
++  case "$1" in
++  *32*)
++    AC_CHECK_LIB([pcre2-32], [pcre2_compile_32], [pcre2_cv_libpcre2_32=yes], [pcre2_cv_libpcre2_32=no])
++    AC_CHECK_HEADER([pcre2.h], [pcre2_cv_pcre2_32_h=yes], [pcre2_cv_pcre2_32_h=no], [#define PCRE2_CODE_UNIT_WIDTH 32])
++    if test "$pcre2_cv_libpcre2_32" = "no" || test "$pcre2_cv_pcre2_32_h" = "no"; then
++      pcre2_cv_libpcre2=no
++    fi
++  esac
++  AC_LANG_POP([C])
++  if test "$pcre2_cv_libpcre2" = "yes" && test "$pcre2_cv_pcre2_h" = "yes"
++  then
++    #
++    # If both library and header were found, action-if-found
++    #
++    m4_ifblank([$2],[
++                PCRE2_CFLAGS="-I${PCRE2_HOME}/include"
++                PCRE2_LDFLAGS="-L${PCRE2_HOME}/lib"
++                PCRE2_LDADD="-lpcre2-8"
++		AC_SUBST(PCRE2_CFLAGS)
++		AC_SUBST(PCRE2_LDFLAGS)
++		AC_SUBST(PCRE2_LDADD)
++                AC_DEFINE([WITH_PCRE2], [1],
++                          [Define to 1 if you have `PCRE2' library (-lpcre2-$1)])
++               ],[
++                # Restore variables
++                LDFLAGS="$PCRE2_OLD_LDFLAGS"
++                CPPFLAGS="$PCRE2_OLD_CPPFLAGS"
++                $2
++               ])
++  else
++    #
++    # If either header or library was not found, action-if-not-found
++    #
++    m4_default([$3],[
++                AC_MSG_ERROR([either specify a valid PCRE2 installation with --with-pcre2=DIR or disable PCRE2 usage with --without-pcre2])
++                ])
++  fi
++fi
++])
+diff -urN a/build/pcre2.m4 b/build/pcre2.m4
+--- a/build/pcre2.m4	2023-04-12 19:52:53.000000000 +0200
++++ b/build/pcre2.m4	1970-01-01 01:00:00.000000000 +0100
+@@ -1,180 +0,0 @@
+-dnl Check for PCRE2 Libraries
+-dnl CHECK_PCRE2(ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
+-
+-AC_DEFUN([PROG_PCRE2], [
+-
+-# Possible names for the pcre2 library/package (pkg-config)
+-PCRE2_POSSIBLE_LIB_NAMES="pcre2 pcre2-8"
+-
+-# Possible extensions for the library
+-PCRE2_POSSIBLE_EXTENSIONS="so so0 la sl dll dylib so.0.0.0"
+-
+-# Possible paths (if pkg-config was not found, proceed with the file lookup)
+-PCRE2_POSSIBLE_PATHS="/usr/lib /usr/local/lib /usr/local/libpcre2-8 /usr/local/pcre2 /usr/local /opt/libpcre2-8 /opt/pcre2 /opt /usr /usr/lib64 /opt/local"
+-
+-# Variables to be set by this very own script.
+-PCRE2_VERSION=""
+-PCRE2_CFLAGS=""
+-PCRE2_CPPFLAGS=""
+-PCRE2_LDADD=""
+-PCRE2_LDFLAGS=""
+-
+-AC_ARG_WITH(
+-    pcre2,
+-    [AS_HELP_STRING([--with-pcre2=PATH],[Path to pcre2 prefix or config script])]
+-)
+-
+-if test "x${with_pcre2}" == "xno"; then
+-    AC_DEFINE(HAVE_PCRE2, 0, [Support for PCRE2 was disabled by the utilization of --without-pcre2 or --with-pcre2=no])
+-    AC_MSG_NOTICE([Support for PCRE2 was disabled by the utilization of --without-pcre2 or --with-pcre2=no])
+-    PCRE2_DISABLED=yes
+-else
+-    if test "x${with_pcre2}" == "xyes"; then
+-        PCRE2_MANDATORY=yes
+-        AC_MSG_NOTICE([PCRE2 support was marked as mandatory by the utilization of --with-pcre2=yes])
+-    fi
+-#        for x in ${PCRE2_POSSIBLE_LIB_NAMES}; do
+-#            CHECK_FOR_PCRE2_AT(${x})
+-#            if test -n "${PCRE2_VERSION}"; then
+-#                break
+-#            fi
+-#        done
+-
+-#    if test "x${with_pcre2}" != "xyes" or test "x${with_pcre2}" == "xyes"; then
+-        if test "x${with_pcre2}" == "x" || test "x${with_pcre2}" == "xyes"; then
+-            # Nothing about PCRE2 was informed, using the pkg-config to figure things out.
+-            if test -n "${PKG_CONFIG}"; then
+-                PCRE2_PKG_NAME=""
+-                for x in ${PCRE2_POSSIBLE_LIB_NAMES}; do
+-                    if ${PKG_CONFIG} --exists ${x}; then
+-                        PCRE2_PKG_NAME="$x"
+-                        break
+-                    fi
+-                done
+-            fi
+-            AC_MSG_NOTICE([Nothing about PCRE2 was informed during the configure phase. Trying to detect it on the platform...])
+-            if test -n "${PCRE2_PKG_NAME}"; then
+-                # Package was found using the pkg-config scripts
+-                PCRE2_VERSION="`${PKG_CONFIG} ${PCRE2_PKG_NAME} --modversion`"
+-                PCRE2_CFLAGS="`${PKG_CONFIG} ${PCRE2_PKG_NAME} --cflags`"
+-                PCRE2_LDADD="`${PKG_CONFIG} ${PCRE2_PKG_NAME} --libs-only-l`"
+-                PCRE2_LDFLAGS="`${PKG_CONFIG} ${PCRE2_PKG_NAME} --libs-only-L --libs-only-other`"
+-                PCRE2_DISPLAY="${PCRE2_LDADD}, ${PCRE2_CFLAGS}"
+-            else
+-                # If pkg-config did not find anything useful, go over file lookup.
+-                for x in ${PCRE2_POSSIBLE_PATHS}; do
+-                    CHECK_FOR_PCRE2_AT(${x})
+-                    if test -n "${PCRE2_VERSION}"; then
+-                        break
+-                    fi
+-                done
+-            fi
+-        fi
+-        if test "x${with_pcre2}" != "x"; then
+-            # An specific path was informed, lets check.
+-            PCRE2_MANDATORY=yes
+-            CHECK_FOR_PCRE2_AT(${with_pcre2})
+-        fi
+-#    fi
+-fi
+-
+-if test -z "${PCRE2_LDADD}"; then
+-    if test -z "${PCRE2_MANDATORY}"; then
+-        if test -z "${PCRE2_DISABLED}"; then
+-            AC_MSG_NOTICE([PCRE2 library was not found])
+-            PCRE2_FOUND=0
+-        else
+-            PCRE2_FOUND=2
+-        fi
+-    else
+-        AC_MSG_ERROR([PCRE2 was explicitly referenced but it was not found])
+-        PCRE2_FOUND=-1
+-    fi
+-else
+-    if test -z "${PCRE2_MANDATORY}"; then
+-        PCRE2_FOUND=2
+-        AC_MSG_NOTICE([PCRE2 is disabled by default.])
+-    else
+-        PCRE2_FOUND=1
+-        AC_MSG_NOTICE([using PCRE2 v${PCRE2_VERSION}])
+-        PCRE2_CFLAGS="-DWITH_PCRE2 ${PCRE2_CFLAGS}"
+-        PCRE2_DISPLAY="${PCRE2_LDADD}, ${PCRE2_CFLAGS}"
+-        AC_SUBST(PCRE2_VERSION)
+-        AC_SUBST(PCRE2_LDADD)
+-        AC_SUBST(PCRE2_LIBS)
+-        AC_SUBST(PCRE2_LDFLAGS)
+-        AC_SUBST(PCRE2_CFLAGS)
+-        AC_SUBST(PCRE2_DISPLAY)
+-    fi
+-fi
+-
+-
+-AC_SUBST(PCRE2_FOUND)
+-
+-]) # AC_DEFUN [PROG_PCRE2]
+-
+-
+-AC_DEFUN([CHECK_FOR_PCRE2_AT], [
+-    path=$1
+-    echo "*** LOOKING AT PATH: " ${path}
+-    for y in ${PCRE2_POSSIBLE_EXTENSIONS}; do
+-        for z in ${PCRE2_POSSIBLE_LIB_NAMES}; do
+-           if test -e "${path}/${z}.${y}"; then
+-               pcre2_lib_path="${path}/"
+-               pcre2_lib_name="${z}"
+-               pcre2_lib_file="${pcre2_lib_path}/${z}.${y}"
+-               break
+-           fi
+-           if test -e "${path}/lib${z}.${y}"; then
+-               pcre2_lib_path="${path}/"
+-               pcre2_lib_name="${z}"
+-               pcre2_lib_file="${pcre2_lib_path}/lib${z}.${y}"
+-               break
+-           fi
+-           if test -e "${path}/lib/lib${z}.${y}"; then
+-               pcre2_lib_path="${path}/lib/"
+-               pcre2_lib_name="${z}"
+-               pcre2_lib_file="${pcre2_lib_path}/lib${z}.${y}"
+-               break
+-           fi
+-           if test -e "${path}/lib/x86_64-linux-gnu/lib${z}.${y}"; then
+-               pcre2_lib_path="${path}/lib/x86_64-linux-gnu/"
+-               pcre2_lib_name="${z}"
+-               pcre2_lib_file="${pcre2_lib_path}/lib${z}.${y}"
+-               break
+-           fi
+-           if test -e "${path}/lib/i386-linux-gnu/lib${z}.${y}"; then
+-               pcre2_lib_path="${path}/lib/i386-linux-gnu/"
+-               pcre2_lib_name="${z}"
+-               pcre2_lib_file="${pcre2_lib_path}/lib${z}.${y}"
+-               break
+-           fi
+-       done
+-       if test -n "$pcre2_lib_path"; then
+-           break
+-       fi
+-    done
+-    if test -e "${path}/include/pcre2.h"; then
+-        pcre2_inc_path="${path}/include"
+-    elif test -e "${path}/pcre2.h"; then
+-        pcre2_inc_path="${path}"
+-    elif test -e "${path}/include/pcre2/pcre2.h"; then
+-        pcre2_inc_path="${path}/include"
+-    fi
+-
+-    if test -n "${pcre2_lib_path}"; then
+-        AC_MSG_NOTICE([PCRE2 library found at: ${pcre2_lib_file}])
+-    fi
+-
+-    if test -n "${pcre2_inc_path}"; then
+-        AC_MSG_NOTICE([PCRE2 headers found at: ${pcre2_inc_path}])
+-    fi
+-
+-    if test -n "${pcre2_lib_path}" -a -n "${pcre2_inc_path}"; then
+-        # TODO: Compile a piece of code to check the version.
+-        PCRE2_CFLAGS="-I${pcre2_inc_path}"
+-        PCRE2_LDADD="-l${pcre2_lib_name}"
+-        PCRE2_LDFLAGS="-L${pcre2_lib_path}"
+-        PCRE2_DISPLAY="${pcre2_lib_file}, ${pcre2_inc_path}"
+-    fi
+-]) # AC_DEFUN [CHECK_FOR_PCRE2_AT]
+diff -urN a/configure.ac b/configure.ac
+--- a/configure.ac	2023-04-12 19:52:53.000000000 +0200
++++ b/configure.ac	2023-04-15 14:46:32.639876994 +0200
+@@ -132,7 +132,7 @@
+ #
+ # Check for pcre2
+ #
+-PROG_PCRE2
++AX_CHECK_PCRE2
+ AM_CONDITIONAL([PCRE2_CFLAGS], [test "PCRE2_CFLAGS" != ""])
+ 
+ 
+diff -urN a/src/operators/verify_cc.h b/src/operators/verify_cc.h
+--- a/src/operators/verify_cc.h	2023-04-12 19:52:54.000000000 +0200
++++ b/src/operators/verify_cc.h	2023-04-15 14:46:32.639876994 +0200
+@@ -16,6 +16,10 @@
+ #ifndef SRC_OPERATORS_VERIFY_CC_H_
+ #define SRC_OPERATORS_VERIFY_CC_H_
+ 
++#if HAVE_CONFIG_H
++#include "src/config.h"
++#endif
++
+ #if WITH_PCRE2
+ #define PCRE2_CODE_UNIT_WIDTH 8
+ #include <pcre2.h>
+diff -urN a/src/utils/regex.h b/src/utils/regex.h
+--- a/src/utils/regex.h	2023-04-12 19:52:54.000000000 +0200
++++ b/src/utils/regex.h	2023-04-15 14:46:32.643876758 +0200
+@@ -12,6 +12,14 @@
+  * directly using the email address security@modsecurity.org.
+  *
+  */
++
++#ifndef SRC_UTILS_REGEX_H_
++#define SRC_UTILS_REGEX_H_
++
++#if HAVE_CONFIG_H
++#include "src/config.h"
++#endif
++
+ #if WITH_PCRE2
+ #define PCRE2_CODE_UNIT_WIDTH 8
+ #include <pcre2.h>
+@@ -25,9 +33,6 @@
+ #include <list>
+ #include <vector>
+ 
+-#ifndef SRC_UTILS_REGEX_H_
+-#define SRC_UTILS_REGEX_H_
+-
+ 
+ namespace modsecurity {
+ namespace Utils {
