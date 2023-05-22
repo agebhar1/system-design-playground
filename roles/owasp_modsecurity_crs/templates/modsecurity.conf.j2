@@ -1,7 +1,7 @@
 include {{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/recommended.conf
 include {{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs/crs-setup.conf
 include {{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
-{% for rule in rules %}
+{% for rule in owasp_modsecurity_crs_enabled_rules %}
 include {{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs/rules/{{ rule }}.conf
 {% endfor %}
 include {{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
