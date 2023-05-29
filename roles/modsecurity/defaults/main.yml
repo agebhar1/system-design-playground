@@ -12,4 +12,5 @@ modsecurity_configuration:
   - --enable-parser-generation
   - --with-lmdb
   - --with-lua
+  - --with-pcre2
   - --with-yajl
