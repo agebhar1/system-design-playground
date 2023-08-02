@@ -12,5 +12,5 @@ modsecurity_nginx:
   checksum: sha256:ae811c7208ac029cb7a99d6f63e03d3971797607517187f47620df39c1f78add
 
 owasp_modsecurity_crs:
-  version: 3.3.4
-  checksum: sha256:15a84aaa041aa532905a34546b613bd3aed122e3f9814fbb5c28e1655d02b74d
+  version: 3.3.5
+  checksum: sha256:6e311e9b5c07741392a6983075101915988127d385fa786e36d83018ea0a401b
