@@ -1,14 +1,13 @@
 ---
-nginx:
-  version: null
-  checksum: null
+nginx_version: null
+nginx_checksum: null
 
 nginx_user: "{{ ansible_user }}"
 nginx_user_home: "{{ ansible_user_dir }}"
 nginx_src_directory: "{{ nginx_user_home }}/src"
 
 nginx_build_configuration:
-  - --add-module=../../modsecurity-nginx/{{ modsecurity_nginx.version }}
+  - --add-module=../../modsecurity-nginx/{{ modsecurity_nginx_version }}
   - --with-debug
   - --with-http_auth_request_module
   - --with-http_gzip_static_module

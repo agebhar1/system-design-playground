@@ -34,20 +34,20 @@
     mode: "0700"
   loop:
     - { dest: "{{ modsecurity_src_directory }}/download" }
-    - { dest: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}" }
+    - { dest: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}" }
 
 - name: Ensure source is present.
   ansible.builtin.get_url:
-    url: https://github.com/SpiderLabs/ModSecurity/releases/download/v{{ modsecurity.version }}/modsecurity-v{{ modsecurity.version }}.tar.gz
-    dest: "{{ modsecurity_src_directory }}/download/modsecurity-v{{ modsecurity.version }}.tar.gz"
-    checksum: "{{ modsecurity.checksum }}"
+    url: https://github.com/SpiderLabs/ModSecurity/releases/download/v{{ modsecurity_version }}/modsecurity-v{{ modsecurity_version }}.tar.gz
+    dest: "{{ modsecurity_src_directory }}/download/modsecurity-v{{ modsecurity_version }}.tar.gz"
+    checksum: "{{ modsecurity_checksum }}"
     mode: "0600"
 
 - name: Ensure source is extracted.
   ansible.builtin.unarchive:
-    src: "{{ modsecurity_src_directory }}/download/modsecurity-v{{ modsecurity.version }}.tar.gz"
-    dest: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}"
-    creates: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}/configure"
+    src: "{{ modsecurity_src_directory }}/download/modsecurity-v{{ modsecurity_version }}.tar.gz"
+    dest: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}"
+    creates: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}/configure"
     remote_src: true
     extra_opts:
       - --strip-components=1
@@ -56,13 +56,13 @@
 - name: Ensure patches are applied.
   ansible.posix.patch:
     src: "{{ item }}"
-    basedir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}"
+    basedir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}"
     strip: 1
-  with_fileglob: files/modsecurity/{{ modsecurity.version }}/patches/*.patch
+  with_fileglob: files/modsecurity/{{ modsecurity_version }}/patches/*.patch
 
 - name: Fetch latest configuration hash.
   ansible.builtin.slurp:
-    src: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}/.ansible"
+    src: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}/.ansible"
   ignore_errors: true
   register: modsecurity_configuration_latest_hash
 
@@ -78,13 +78,13 @@
     - name: Run 'build.sh'.
       ansible.builtin.command:
         argv: ./build.sh
-        chdir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}"
+        chdir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}"
       tags:
         - skip_ansible_lint
     - name: Run './configure'.
       ansible.builtin.command:
         argv: "{{ ['./configure', prefix] + modsecurity_configuration }}"
-        chdir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}"
+        chdir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}"
       vars:
         prefix: --prefix={{ modsecurity_dist_directory }}
       tags:
@@ -92,18 +92,18 @@
     - name: Save current configuration hash.
       ansible.builtin.copy:
         content: "{{ modsecurity_configuration | sort | md5 }}"
-        dest: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}/.ansible"
+        dest: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}/.ansible"
         mode: "0600"
 
 - name: Ensure artifacts are build.
   community.general.make:
-    chdir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}"
+    chdir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}"
     jobs: "{{ (ansible_processor_nproc * 0.75) | round(0, 'floor') | int }}"
   register: modsecurity_make
 
 - name: Ensure artifacts are present.
   # noqa: no-handler
   community.general.make:
-    chdir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity.version }}"
+    chdir: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}"
     target: install
   when: modsecurity_make.changed

@@ -1,7 +1,6 @@
 ---
-owasp_modsecurity_crs:
-  version:
-  checksum:
+owasp_modsecurity_crs_version: null
+owasp_modsecurity_crs_checksum: null
 
 owasp_modsecurity_crs_user: "{{ ansible_user }}"
 owasp_modsecurity_crs_user_home: "{{ ansible_user_dir }}"

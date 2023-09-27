@@ -1,7 +1,6 @@
 ---
-modsecurity:
-  version: null
-  checksum: null
+modsecurity_version: null
+modsecurity_checksum: null
 
 modsecurity_user: "{{ ansible_user }}"
 modsecurity_user_home: "{{ ansible_user_dir }}"

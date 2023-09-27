@@ -19,8 +19,8 @@
     mode: "0700"
   loop:
     - { dest: "{{ nginx_src_directory }}/download" }
-    - { dest: "{{ nginx_src_directory }}/modsecurity-nginx/{{ modsecurity_nginx.version }}" }
-    - { dest: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}" }
+    - { dest: "{{ nginx_src_directory }}/modsecurity-nginx/{{ modsecurity_nginx_version }}" }
+    - { dest: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}" }
     - { dest: "{{ nginx_user_home }}/.config/systemd/user" }
     - { dest: "{{ nginx_user_home }}/etc/logrotate.d/daily.d" }
     - { dest: "{{ nginx_user_home }}/etc/nginx/conf.d" }
@@ -31,16 +31,16 @@
 
 - name: Ensure source is present.
   ansible.builtin.get_url:
-    url: https://nginx.org/download/nginx-{{ nginx.version }}.tar.gz
-    dest: "{{ nginx_src_directory }}/download/nginx-{{ nginx.version }}.tar.gz"
-    checksum: "{{ nginx.checksum }}"
+    url: https://nginx.org/download/nginx-{{ nginx_version }}.tar.gz
+    dest: "{{ nginx_src_directory }}/download/nginx-{{ nginx_version }}.tar.gz"
+    checksum: "{{ nginx_checksum }}"
     mode: "0600"
 
 - name: Ensure source is extracted.
   ansible.builtin.unarchive:
-    src: "{{ nginx_src_directory }}/download/nginx-{{ nginx.version }}.tar.gz"
-    dest: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
-    creates: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}/configure"
+    src: "{{ nginx_src_directory }}/download/nginx-{{ nginx_version }}.tar.gz"
+    dest: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}"
+    creates: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}/configure"
     remote_src: true
     extra_opts:
       - --strip-components=1
@@ -49,22 +49,22 @@
 - name: Ensure patches are applied.
   ansible.posix.patch:
     src: "{{ item }}"
-    basedir: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
+    basedir: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}"
     strip: 1
-  with_fileglob: files/nginx/{{ nginx.version }}/patches/*.patch
+  with_fileglob: files/nginx/{{ nginx_version }}/patches/*.patch
 
 - name: Ensure »Nginx ModSecurity Module« source is present.
   ansible.builtin.get_url:
     # yamllint disable-line rule:line-length
-    url: https://github.com/SpiderLabs/ModSecurity-nginx/releases/download/v{{ modsecurity_nginx.version }}/modsecurity-nginx-v{{ modsecurity_nginx.version }}.tar.gz
-    dest: "{{ nginx_src_directory }}/download/modsecurity-nginx-v{{ modsecurity_nginx.version }}.tar.gz"
-    checksum: "{{ modsecurity_nginx.checksum }}"
+    url: https://github.com/SpiderLabs/ModSecurity-nginx/releases/download/v{{ modsecurity_nginx_version }}/modsecurity-nginx-v{{ modsecurity_nginx_version }}.tar.gz
+    dest: "{{ nginx_src_directory }}/download/modsecurity-nginx-v{{ modsecurity_nginx_version }}.tar.gz"
+    checksum: "{{ modsecurity_nginx_checksum }}"
     mode: "0600"
 
 - name: Ensure »Nginx ModSecurity Module« source is extracted.
   ansible.builtin.unarchive:
-    src: "{{ nginx_src_directory }}/download/modsecurity-nginx-v{{ modsecurity_nginx.version }}.tar.gz"
-    dest: "{{ nginx_src_directory }}/modsecurity-nginx/{{ modsecurity_nginx.version }}"
+    src: "{{ nginx_src_directory }}/download/modsecurity-nginx-v{{ modsecurity_nginx_version }}.tar.gz"
+    dest: "{{ nginx_src_directory }}/modsecurity-nginx/{{ modsecurity_nginx_version }}"
     remote_src: true
     extra_opts:
       - --strip-components=1
@@ -72,7 +72,7 @@
 
 - name: Fetch latest configuration hash.
   ansible.builtin.slurp:
-    src: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}/.ansible"
+    src: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}/.ansible"
   ignore_errors: true
   register: nginx_build_configuration_latest_hash
 
@@ -88,7 +88,7 @@
     - name: Run './configure'.
       ansible.builtin.command:
         argv: "{{ ['./configure'] + configuration + nginx_build_configuration }}"
-        chdir: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
+        chdir: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}"
       vars:
         configuration:
           - --with-cc-opt=-I/usr/include -I{{ nginx_user_home }}/include
@@ -109,19 +109,19 @@
     - name: Save current configuration hash.
       ansible.builtin.copy:
         content: "{{ nginx_build_configuration | sort | md5 }}"
-        dest: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}/.ansible"
+        dest: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}/.ansible"
         mode: "0600"
 
 - name: Ensure artifacts are build.
   community.general.make:
-    chdir: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
+    chdir: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}"
     jobs: "{{ (ansible_processor_nproc * 0.75) | round(0, 'floor') | int }}"
   register: nginx_make
 
 - name: Ensure artifacts are present.
   # noqa: no-handler
   community.general.make:
-    chdir: "{{ nginx_src_directory }}/nginx/{{ nginx.version }}"
+    chdir: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}"
     target: install
   when: nginx_make.changed
   notify: nginx changed
