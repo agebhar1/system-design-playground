@@ -1,0 +1,2 @@
+---
+tomcat_version_major: "{{ tomcat_version | ansible.builtin.regex_search('^(\\d+)[.]', '\\1') | first }}"

@@ -1,0 +1,9 @@
+---
+- name: Reload Apache Tomcat user service
+  listen: tomcat changed
+  ansible.builtin.systemd:
+    name: tomcat
+    daemon_reload: true
+    enabled: true
+    scope: user
+    state: restarted

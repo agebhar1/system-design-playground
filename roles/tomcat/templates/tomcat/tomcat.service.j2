@@ -1,0 +1,19 @@
+[Unit]
+Description=Apache Tomcat {{ tomcat_version }}
+After=syslog.target network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+UMask=0077
+PIDFile={{ tomcat_user_home }}/opt/tomcat/{{ tomcat_version }}/tomcat.pid
+Environment="CATALINA_PID={{ tomcat_user_home }}/opt/tomcat/{{ tomcat_version }}/tomcat.pid"
+Environment="CATALINA_HOME={{ tomcat_user_home }}/opt/tomcat/{{ tomcat_version }}"
+Environment="CATALINA_OPTS=-server -XX:+HeapDumpOnOutOfMemoryError -Djava.awt.headless=true -Dfile.encoding=UTF-8"
+Environment="JRE_HOME={{ java_user_home }}/usr/lib/jvm/{{ tomcat_java_version }}"
+ExecStart={{ tomcat_user_home }}/opt/tomcat/{{ tomcat_version }}/bin/startup.sh
+ExecStop={{ tomcat_user_home }}/opt/tomcat/{{ tomcat_version }}/bin/shutdown.sh 30 -force
+Restart=always
+
+[Install]
+WantedBy=default.target

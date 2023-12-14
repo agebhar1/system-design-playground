@@ -1,0 +1,22 @@
+---
+tomcat_version: null
+tomcat_checksum: null
+tomcat_java_version: null
+tomcat_java_checksum: null
+
+tomcat_user: "{{ ansible_user }}"
+tomcat_user_home: "{{ ansible_user_dir }}"
+tomcat_src_directory: "{{ tomcat_user_home }}/src"
+
+tomcat_port: 8081
+tomcat_shutdown_port: -1
+
+tomcat_connector_attributes:
+  port: "{{ tomcat_port }}"
+  protocol: HTTP/1.1
+  connectionTimeout: 20000
+  maxParameterCount: 1000
+
+tomcat_server_attributes:
+  port: "{{ tomcat_shutdown_port }}"
+  shutdown: SHUTDOWN

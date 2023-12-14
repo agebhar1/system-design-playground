@@ -1,0 +1,6 @@
+---
+dependencies:
+  - role: java
+    vars:
+      java_version: "{{ tomcat_java_version }}"
+      java_checksum: "{{ tomcat_java_checksum }}"
