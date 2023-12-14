@@ -1,0 +1,2 @@
+---
+java_version_major: "{{ java_version | ansible.builtin.regex_search('^zulu(\\d+)[.]', '\\1') | first }}"

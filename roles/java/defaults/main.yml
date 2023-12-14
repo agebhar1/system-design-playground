@@ -1,0 +1,7 @@
+---
+java_version: null
+java_checksum: null
+
+java_user: "{{ ansible_user }}"
+java_user_home: "{{ ansible_user_dir }}"
+java_src_directory: "{{ java_user_home }}/src"

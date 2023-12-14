@@ -1,0 +1,32 @@
+---
+- name: Ensure required directories are present.
+  ansible.builtin.file:
+    dest: "{{ item.dest }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - { dest: "{{ java_src_directory }}/download" }
+    - { dest: "{{ java_user_home }}/usr/lib/jvm/{{ java_version }}" }
+
+- name: Ensure binary archive is present.
+  ansible.builtin.get_url:
+    url: https://cdn.azul.com/zulu/bin/{{ java_version }}-linux_x64.tar.gz
+    dest: "{{ java_src_directory }}/download/{{ java_version }}-linux_x64.tar.gz"
+    checksum: "{{ java_checksum }}"
+    mode: "0600"
+
+- name: Ensure binary archive is extracted.
+  ansible.builtin.unarchive:
+    src: "{{ java_src_directory }}/download/{{ java_version }}-linux_x64.tar.gz"
+    dest: "{{ java_user_home }}/usr/lib/jvm/{{ java_version }}"
+    creates: "{{ java_user_home }}/usr/lib/jvm/{{ java_version }}/release"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    mode: u=rwX,g=,o=
+
+- name: Ensure symlink to major Java version is present.
+  ansible.builtin.file:
+    src: "{{ java_version }}"
+    dest: "{{ java_user_home }}/usr/lib/jvm/{{ java_version_major }}"
+    state: link
