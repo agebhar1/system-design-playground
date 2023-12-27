@@ -242,6 +242,10 @@ SecDebugLogLevel 1
 SecAuditEngine RelevantOnly
 SecAuditLogRelevantStatus "^(?:5|4(?!04))"
 
+# The output format of the AuditLogs. The JSON format is only available if
+# ModSecurity was compiled with support to JSON via the YAJL library.
+SecAuditLogFormat JSON
+
 # Log everything we know about a transaction.
 SecAuditLogParts ABIJDEFHZ
 
