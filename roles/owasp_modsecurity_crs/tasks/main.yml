@@ -8,6 +8,7 @@
     - { dest: "{{ owasp_modsecurity_crs_src_directory }}/download" }
     - { dest: "{{ owasp_modsecurity_crs_src_directory }}/owasp-modsecurity-crs/{{ owasp_modsecurity_crs_version }}" }
     - { dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/owasp-crs" }
+    - { dest: "{{ owasp_modsecurity_crs_user_home }}/var/log/modsecurity" }
 
 - name: Ensure source is present.
   ansible.builtin.get_url:
@@ -50,9 +51,9 @@
     mode: "0600"
 
 - name: Ensure recommended ModSecurity configuration is present.
-  ansible.builtin.copy:
+  ansible.builtin.template:
     # https://github.com/SpiderLabs/ModSecurity/blob/v3/master/modsecurity.conf-recommended
-    src: recommended.conf
+    src: recommended.conf.j2
     dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity/recommended.conf"
     mode: "0600"
 
