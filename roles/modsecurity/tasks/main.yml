@@ -60,17 +60,22 @@
     strip: 1
   with_fileglob: files/modsecurity/{{ modsecurity_version }}/patches/*.patch
 
+- name: Get current configuration hash.
+  ansible.builtin.set_fact:
+    modsecurity_configuration_hash_current: |-
+      v1:{{ modsecurity_configuration | sort | ansible.builtin.md5 | ansible.builtin.b64encode }}
+
 - name: Fetch latest configuration hash.
   ansible.builtin.slurp:
     src: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}/.ansible"
   ignore_errors: true
-  register: modsecurity_configuration_latest_hash
+  register: modsecurity_configuration_hash_latest
 
 - name: Check if './configure' must be executed.
   ansible.builtin.set_fact:
     modsecurity_configuration_changed: |
-      {{ 'content' not in modsecurity_configuration_latest_hash or
-         (modsecurity_configuration | sort | md5) != (modsecurity_configuration_latest_hash['content'] | b64decode) }}
+      {{ 'content' not in modsecurity_configuration_hash_latest or
+         modsecurity_configuration_hash_current != (modsecurity_configuration_hash_latest['content'] | ansible.builtin.b64decode) }}
 
 - name: Ensure latest build configuration is applied.
   when: modsecurity_configuration_changed
@@ -91,7 +96,7 @@
         - skip_ansible_lint
     - name: Save current configuration hash.
       ansible.builtin.copy:
-        content: "{{ modsecurity_configuration | sort | md5 }}"
+        content: "{{ modsecurity_configuration_hash_current }}"
         dest: "{{ modsecurity_src_directory }}/modsecurity/{{ modsecurity_version }}/.ansible"
         mode: "0600"
 

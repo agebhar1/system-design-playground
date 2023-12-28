@@ -70,6 +70,11 @@
       - --strip-components=1
     mode: u=rwX,g=,o=
 
+- name: Get current configuration hash.
+  ansible.builtin.set_fact:
+    nginx_build_configuration_hash_current: |-
+      v1:{{ nginx_build_configuration | sort | ansible.builtin.md5 | ansible.builtin.b64encode }}
+
 - name: Fetch latest configuration hash.
   ansible.builtin.slurp:
     src: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}/.ansible"
@@ -80,7 +85,7 @@
   ansible.builtin.set_fact:
     nginx_build_configuration_changed: |
       {{ 'content' not in nginx_build_configuration_latest_hash or
-         (nginx_build_configuration | sort | md5) != (nginx_build_configuration_latest_hash['content'] | b64decode) }}
+         nginx_build_configuration_hash_current != (nginx_build_configuration_latest_hash['content'] | ansible.builtin.b64decode) }}
 
 - name: Ensure latest build configuration is applied.
   when: nginx_build_configuration_changed
@@ -108,7 +113,7 @@
 
     - name: Save current configuration hash.
       ansible.builtin.copy:
-        content: "{{ nginx_build_configuration | sort | md5 }}"
+        content: "{{ nginx_build_configuration_hash_current }}"
         dest: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}/.ansible"
         mode: "0600"
 
