@@ -30,6 +30,8 @@ nginx_build_configuration:
   - --without-http_userid_module
   - --without-http_uwsgi_module
 
+nginx_modsecurity_debug: false
+
 nginx_confd_files: []
 
 nginx_confd_templates: []
