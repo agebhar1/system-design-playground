@@ -72,4 +72,4 @@
     dest: "{{ owasp_modsecurity_crs_user_home }}/etc/nginx/modsecurity.conf"
     mode: "0600"
   vars:
-    owasp_modsecurity_crs_enabled_rules: "{{ owasp_modsecurity_crs_rules | difference(owasp_modsecurity_crs_rules_disabled) }}"
+    owasp_modsecurity_crs_enabled_rules: "{{ owasp_modsecurity_crs_rules | difference(owasp_modsecurity_crs_rules_disabled) | sort }}"
