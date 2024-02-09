@@ -13,5 +13,5 @@ owasp_modsecurity_crs_checksum: sha256:6e311e9b5c07741392a6983075101915988127d38
 
 tomcat_version: 10.1.18
 tomcat_checksum: sha512:56d1478501bd63945aae08d9f7c1fd37e14761dd9606a3bf5996870256b542b561a354fb89c4693c5695d0f13fa217028115b311d50b4ecec03acc7785006638
-tomcat_java_version: zulu21.30.15-ca-jre21.0.1
-tomcat_java_checksum: sha256:1c7458a7ff567ca9f0afa063f5ced03331e13eadea3a08b6e44e3410cf7a6eae
+tomcat_java_version: zulu21.32.17-ca-jre21.0.2
+tomcat_java_checksum: sha256:5533b05a58dfe281f7e085ca2dba1b427f6e3ce854d44fd81c5d2a319447299b
