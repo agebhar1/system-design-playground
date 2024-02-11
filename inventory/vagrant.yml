@@ -21,7 +21,8 @@ all:
       ansible_python_interpreter: /usr/bin/python3.6
       vagrant:
         vm:
-          box: opensuse/Leap-15.3.x86_64
+          box: opensuse/Leap-15.5.x86_64
+          box_version: 15.5.13.8
           cpus: 3
           memory: 4096
           gui: false
