@@ -9,6 +9,7 @@ all:
       vagrant:
         vm:
           box: opensuse/Leap-15.4.x86_64
+          box_version: 15.4.93.11
           cpus: 3
           memory: 4096
           gui: false
