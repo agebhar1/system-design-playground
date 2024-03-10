@@ -188,6 +188,7 @@
     mode: "0600"
   notify: nginx changed
   loop: "{{ nginx_vhosts_files }}"
+  register: _nginx_vhosts_files
 
 - name: Ensure virtual host templates are present in `etc/nginx/vhosts`.
   ansible.builtin.template:
@@ -196,6 +197,23 @@
     mode: "0600"
   notify: nginx changed
   loop: "{{ nginx_vhosts_templates }}"
+  register: _nginx_vhosts_templates
+
+- name: Register present files in `etc/nginx/vhosts`.
+  ansible.builtin.find:
+    paths: "{{ nginx_user_home }}/etc/nginx/vhosts"
+  register: _nginx_vhosts_present
+
+- name: Ensure only given configuration files (templates) are present in `etc/nginx/vhosts`.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items: |
+      {{
+        _nginx_vhosts_present | community.general.json_query('files[*].path')
+        | difference(_nginx_vhosts_files | community.general.json_query('results[*].dest'))
+        | difference(_nginx_vhosts_templates | community.general.json_query('results[*].dest'))
+      }}
 
 - name: Ensure logrotation configuration is present.
   ansible.builtin.template:
