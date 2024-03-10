@@ -154,6 +154,7 @@
     mode: "0600"
   notify: nginx changed
   loop: "{{ nginx_confd_files }}"
+  register: _nginx_confd_files
 
 - name: Ensure configuration templates are present in `etc/nginx/conf.d`.
   ansible.builtin.template:
@@ -162,6 +163,23 @@
     mode: "0600"
   notify: nginx changed
   loop: "{{ nginx_confd_templates }}"
+  register: _nginx_confd_templates
+
+- name: Register present files in `etc/nginx/conf.d`.
+  ansible.builtin.find:
+    paths: "{{ nginx_user_home }}/etc/nginx/conf.d"
+  register: _nginx_confd_present
+
+- name: Ensure only given configuration files (templates) are present in `etc/nginx/conf.d`.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items: |
+    {{
+      _nginx_confd_present | community.general.json_query('files[*].path')
+      | difference(_nginx_confd_files | community.general.json_query('results[*].dest'))
+      | difference(_nginx_confd_templates | community.general.json_query('results[*].dest'))
+    }}
 
 - name: Ensure virtual host files are present in `etc/nginx/vhosts`.
   ansible.builtin.copy:
