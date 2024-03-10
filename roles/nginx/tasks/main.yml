@@ -138,10 +138,14 @@
 
 - name: Ensure latest configuration is present.
   ansible.builtin.template:
-    src: nginx.conf.j2
+    src: "{{ item }}"
     dest: "{{ nginx_user_home }}/etc/nginx/nginx.conf"
     mode: "0600"
   notify: nginx changed
+  with_first_found:
+    - "{{ inventory_hostname }}/nginx/nginx.conf.j2"
+    - nginx/nginx.conf.j2
+    - nginx.conf.j2
 
 - name: Ensure configuration files are present in `etc/nginx/conf.d`.
   ansible.builtin.copy:
