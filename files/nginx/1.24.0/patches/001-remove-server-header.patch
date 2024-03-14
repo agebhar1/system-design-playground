@@ -1,5 +1,5 @@
---- nginx-1.23.3.orig/src/http/ngx_http_header_filter_module.c	2022-12-13 15:53:53.000000000 +0000
-+++ nginx-1.23.3/src/http/ngx_http_header_filter_module.c	2023-02-26 09:01:41.315716542 +0000
+--- nginx-1.24.0.orig/src/http/ngx_http_header_filter_module.c	2023-04-11 01:45:34.000000000 +0000
++++ nginx-1.24.0/src/http/ngx_http_header_filter_module.c	2024-02-10 14:01:56.685604727 +0000
 @@ -46,11 +46,6 @@
  };
  
@@ -55,3 +55,96 @@
      if (r->headers_out.date == NULL) {
          b->last = ngx_cpymem(b->last, "Date: ", sizeof("Date: ") - 1);
          b->last = ngx_cpymem(b->last, ngx_cached_http_time.data,
+diff -ur nginx-1.24.0.orig/src/http/v2/ngx_http_v2_filter_module.c nginx-1.24.0/src/http/v2/ngx_http_v2_filter_module.c
+--- nginx-1.24.0.orig/src/http/v2/ngx_http_v2_filter_module.c	2023-04-11 01:45:34.000000000 +0000
++++ nginx-1.24.0/src/http/v2/ngx_http_v2_filter_module.c	2024-03-14 18:44:40.068966026 +0000
+@@ -148,19 +148,11 @@
+     ngx_http_core_srv_conf_t  *cscf;
+     u_char                     addr[NGX_SOCKADDR_STRLEN];
+ 
+-    static const u_char nginx[5] = "\x84\xaa\x63\x55\xe7";
+ #if (NGX_HTTP_GZIP)
+     static const u_char accept_encoding[12] =
+         "\x8b\x84\x84\x2d\x69\x5b\x05\x44\x3c\x86\xaa\x6f";
+ #endif
+ 
+-    static size_t nginx_ver_len = ngx_http_v2_literal_size(NGINX_VER);
+-    static u_char nginx_ver[ngx_http_v2_literal_size(NGINX_VER)];
+-
+-    static size_t nginx_ver_build_len =
+-                                  ngx_http_v2_literal_size(NGINX_VER_BUILD);
+-    static u_char nginx_ver_build[ngx_http_v2_literal_size(NGINX_VER_BUILD)];
+-
+     stream = r->stream;
+ 
+     if (!stream) {
+@@ -259,19 +251,6 @@
+ 
+     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
+ 
+-    if (r->headers_out.server == NULL) {
+-
+-        if (clcf->server_tokens == NGX_HTTP_SERVER_TOKENS_ON) {
+-            len += 1 + nginx_ver_len;
+-
+-        } else if (clcf->server_tokens == NGX_HTTP_SERVER_TOKENS_BUILD) {
+-            len += 1 + nginx_ver_build_len;
+-
+-        } else {
+-            len += 1 + sizeof(nginx);
+-        }
+-    }
+-
+     if (r->headers_out.date == NULL) {
+         len += 1 + ngx_http_v2_literal_size("Wed, 31 Dec 1986 18:00:00 GMT");
+     }
+@@ -463,49 +442,6 @@
+         pos = ngx_sprintf(pos, "%03ui", r->headers_out.status);
+     }
+ 
+-    if (r->headers_out.server == NULL) {
+-
+-        if (clcf->server_tokens == NGX_HTTP_SERVER_TOKENS_ON) {
+-            ngx_log_debug1(NGX_LOG_DEBUG_HTTP, fc->log, 0,
+-                           "http2 output header: \"server: %s\"",
+-                           NGINX_VER);
+-
+-        } else if (clcf->server_tokens == NGX_HTTP_SERVER_TOKENS_BUILD) {
+-            ngx_log_debug1(NGX_LOG_DEBUG_HTTP, fc->log, 0,
+-                           "http2 output header: \"server: %s\"",
+-                           NGINX_VER_BUILD);
+-
+-        } else {
+-            ngx_log_debug0(NGX_LOG_DEBUG_HTTP, fc->log, 0,
+-                           "http2 output header: \"server: nginx\"");
+-        }
+-
+-        *pos++ = ngx_http_v2_inc_indexed(NGX_HTTP_V2_SERVER_INDEX);
+-
+-        if (clcf->server_tokens == NGX_HTTP_SERVER_TOKENS_ON) {
+-            if (nginx_ver[0] == '\0') {
+-                p = ngx_http_v2_write_value(nginx_ver, (u_char *) NGINX_VER,
+-                                            sizeof(NGINX_VER) - 1, tmp);
+-                nginx_ver_len = p - nginx_ver;
+-            }
+-
+-            pos = ngx_cpymem(pos, nginx_ver, nginx_ver_len);
+-
+-        } else if (clcf->server_tokens == NGX_HTTP_SERVER_TOKENS_BUILD) {
+-            if (nginx_ver_build[0] == '\0') {
+-                p = ngx_http_v2_write_value(nginx_ver_build,
+-                                            (u_char *) NGINX_VER_BUILD,
+-                                            sizeof(NGINX_VER_BUILD) - 1, tmp);
+-                nginx_ver_build_len = p - nginx_ver_build;
+-            }
+-
+-            pos = ngx_cpymem(pos, nginx_ver_build, nginx_ver_build_len);
+-
+-        } else {
+-            pos = ngx_cpymem(pos, nginx, sizeof(nginx));
+-        }
+-    }
+-
+     if (r->headers_out.date == NULL) {
+         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, fc->log, 0,
+                        "http2 output header: \"date: %V\"",
