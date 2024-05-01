@@ -8,6 +8,7 @@ nginx_src_directory: "{{ nginx_user_home }}/src"
 
 nginx_build_configuration:
   - --add-module=../../modsecurity-nginx/{{ modsecurity_nginx_version }}
+  - --add-module=../../njs-nginx/{{ njs_version }}/nginx
   - --with-debug
   - --with-http_auth_request_module
   - --with-http_gzip_static_module

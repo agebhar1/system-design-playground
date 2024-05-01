@@ -5,6 +5,7 @@
       - gcc
       - gcc-c++
       - libopenssl-1_1-devel
+      - libxslt-devel
       - make
       - patch
       - pcre-devel
@@ -21,6 +22,7 @@
     - { dest: "{{ nginx_src_directory }}/download" }
     - { dest: "{{ nginx_src_directory }}/modsecurity-nginx/{{ modsecurity_nginx_version }}" }
     - { dest: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}" }
+    - { dest: "{{ nginx_src_directory }}/njs-nginx/{{ njs_version }}" }
     - { dest: "{{ nginx_user_home }}/.config/systemd/user" }
     - { dest: "{{ nginx_user_home }}/etc/logrotate.d/daily.d" }
     - { dest: "{{ nginx_user_home }}/etc/nginx/conf.d" }
@@ -65,6 +67,15 @@
   ansible.builtin.unarchive:
     src: "{{ nginx_src_directory }}/download/modsecurity-nginx-v{{ modsecurity_nginx_version }}.tar.gz"
     dest: "{{ nginx_src_directory }}/modsecurity-nginx/{{ modsecurity_nginx_version }}"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    mode: u=rwX,g=,o=
+
+- name: Ensure »Nginx njs Module« source is extracted.
+  ansible.builtin.unarchive:
+    src: "{{ nginx_src_directory }}/download/njs-v{{ njs_version }}.tar.gz"
+    dest: "{{ nginx_src_directory }}/njs-nginx/{{ njs_version }}"
     remote_src: true
     extra_opts:
       - --strip-components=1

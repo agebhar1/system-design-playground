@@ -47,7 +47,10 @@ $ curl -H 'User-Agent: nessus' -H 'X-Request-ID: 1' 192.168.56.{2,3}
 - https://coreruleset.org/
 - https://github.com/SpiderLabs/ModSecurity
 - https://github.com/SpiderLabs/ModSecurity-nginx
-- http://nginx.org/en/download.html
+- https://nginx.org/en/download.html
+- https://nginx.org/en/docs/njs/
+- https://github.com/nginx/njs-examples
+- https://nginx.org/en/docs/njs/typescript.html
 - https://www.nginx.com/blog/compiling-and-installing-modsecurity-for-open-source-nginx/
 - https://www.nginx.com/blog/deploying-nginx-plus-as-an-api-gateway-part-1/
 - https://www.nginx.com/resources/wiki/start/topics/examples/logrotation/
