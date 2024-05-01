@@ -36,7 +36,7 @@ $ curl -H 'User-Agent: nessus' -H 'X-Request-ID: 1' 192.168.56.{2,3}
 <head><title>403 Forbidden</title></head>
 <body>
 <center><h1>403 Forbidden</h1></center>
-<hr><center>nginx/1.23.4</center>
+<hr><center>nginx/1.25.5</center>
 </body>
 </html>
 …
