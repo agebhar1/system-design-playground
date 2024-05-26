@@ -8,8 +8,8 @@ all:
       ansible_python_interpreter: /usr/bin/python3.6
       vagrant:
         vm:
-          box: opensuse/Leap-15.4.x86_64
-          box_version: 15.4.93.11
+          box: opensuse/Leap-15.6.x86_64
+          box_version: 15.6.13.203
           cpus: 3
           memory: 4096
           gui: false
