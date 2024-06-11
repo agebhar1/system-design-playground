@@ -22,6 +22,14 @@ Vagrant.configure("2") do |config|
         vb.memory = vm['memory']
       end
 
+      config.vm.provision "shell", inline: $provision_privileged
+
     end
   end
 end
+
+$provision_privileged = <<-SCRIPT
+zypper refresh
+zypper --non-interactive install python311
+
+SCRIPT
