@@ -11,6 +11,9 @@ modsecurity_nginx_checksum: sha256:ae811c7208ac029cb7a99d6f63e03d397179760751718
 owasp_modsecurity_crs_version: 3.3.5
 owasp_modsecurity_crs_checksum: sha256:6e311e9b5c07741392a6983075101915988127d385fa786e36d83018ea0a401b
 
+quickjs_version: 2024-01-13
+quickjs_checksum: sha256:3c4bf8f895bfa54beb486c8d1218112771ecfc5ac3be1036851ef41568212e03
+
 tomcat_version: 10.1.24
 tomcat_checksum: sha512:793802f5cbbc0c4f722d3c63b52323df7ca37846445c254edcaaa7702fd71cf72aa9506b2b2c59322b9635e25f69913aa1b223098d9b4f1426f5f5447dd78ff3
 tomcat_java_version: zulu21.34.19-ca-jre21.0.3

@@ -53,3 +53,4 @@ $ curl -H 'User-Agent: nessus' -H 'X-Request-ID: 1' 192.168.56.{2,3}
 - https://www.nginx.com/resources/wiki/start/topics/examples/logrotation/
 - https://www.digitalocean.com/community/tutorials/how-to-configure-logging-and-log-rotation-in-nginx-on-an-ubuntu-vps
 - https://www.englert.one/logrotate-tutorial
+- https://bellard.org/quickjs/
