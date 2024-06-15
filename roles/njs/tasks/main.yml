@@ -1,0 +1,68 @@
+---
+- name: Ensure build dependencies are present.
+  community.general.zypper:
+    name:
+      - gcc
+      - gcc-c++
+      - libedit
+      - libopenssl-1_1-devel
+      - libxslt-devel
+      - make
+      - pcre-devel
+      - zlib-devel
+    state: present
+  become: true
+
+- name: Ensure required directories are present.
+  ansible.builtin.file:
+    dest: "{{ item.dest }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - { dest: "{{ njs_src_directory }}/download" }
+    - { dest: "{{ njs_src_directory }}/njs/{{ njs_version }}" }
+    - { dest: "{{ njs_user_home }}/bin" }
+
+- name: Ensure »Nginx njs Module« source is present.
+  ansible.builtin.get_url:
+    url: https://github.com/nginx/njs/archive/refs/tags/{{ njs_version }}.tar.gz
+    dest: "{{ njs_src_directory }}/download/njs-v{{ njs_version }}.tar.gz"
+    checksum: "{{ njs_checksum }}"
+    mode: "0600"
+
+- name: Ensure »Nginx njs Module« source is extracted.
+  ansible.builtin.unarchive:
+    src: "{{ njs_src_directory }}/download/njs-v{{ njs_version }}.tar.gz"
+    dest: "{{ njs_src_directory }}/njs/{{ njs_version }}"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    mode: u=rwX,g=,o=
+
+- name: Get stats of Makefile
+  ansible.builtin.stat:
+    path: "{{ njs_src_directory }}/njs/{{ njs_version }}/Makefile"
+  register: njs_makefile_stat
+
+- name: Check if './configure' must be executed.
+  ansible.builtin.set_fact:
+    njs_makefile_missing: "{{ not njs_makefile_stat.stat.exists }}"
+
+- name: Run './configure'.
+  ansible.builtin.command:
+    argv: ['./configure', '--cc-opt=-I{{ njs_user_home }}/include/quickjs -L{{ njs_user_home }}/lib/quickjs']
+    chdir: "{{ njs_src_directory }}/njs/{{ njs_version }}"
+  when: njs_makefile_missing
+  changed_when: njs_makefile_missing
+
+- name: Ensure artifacts are build.
+  community.general.make:
+    chdir: "{{ njs_src_directory }}/njs/{{ njs_version }}"
+    jobs: "{{ (ansible_processor_nproc * 0.75) | round(0, 'floor') | int }}"
+
+- name: Ensure »njs« is present.
+  ansible.builtin.copy:
+    src: "{{ njs_src_directory }}/njs/{{ njs_version }}/build/njs"
+    dest: "{{ njs_user_home }}/bin/njs"
+    mode: u=rwx,g=,o=
+    remote_src: true

@@ -4,5 +4,6 @@
 
   roles:
     - role: nginx
+    - role: njs
     - role: logrotate
     - role: iptables

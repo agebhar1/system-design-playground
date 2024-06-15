@@ -1,0 +1,7 @@
+---
+njs_version: null
+njs_checksum: null
+
+njs_user: "{{ ansible_user }}"
+njs_user_home: "{{ ansible_user_dir }}"
+njs_src_directory: "{{ njs_user_home }}/src"
