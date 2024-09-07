@@ -1,0 +1,9 @@
+---
+- name: Start logrotate user systemd timer
+  listen: logrotate changed
+  ansible.builtin.systemd:
+    name: logrotate.timer
+    daemon_reload: true
+    enabled: true
+    scope: user
+    state: started

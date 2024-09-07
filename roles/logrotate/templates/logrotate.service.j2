@@ -1,0 +1,32 @@
+[Unit]
+Description=Rotate log files
+ConditionACPower=true
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/logrotate {{ logrotate_user_home }}/etc/logrotate.d/daily.conf --state {{ logrotate_user_home }}/var/lib/logrotate/daily.status --log {{ logrotate_user_home }}/var/log/logrotate-daily.log
+
+Nice=19
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+Environment=HOME={{ logrotate_user_home }}
+
+# hardening options
+#  details: https://www.freedesktop.org/software/systemd/man/systemd.exec.html
+#  no ProtectHome for userdir logs
+#  no PrivateNetwork for mail deliviery
+#  no NoNewPrivileges for third party rotate scripts
+#  no RestrictSUIDSGID for creating setgid directories
+#LockPersonality=true
+#MemoryDenyWriteExecute=true
+#PrivateDevices=true
+#PrivateTmp=true
+#ProtectClock=true
+#ProtectControlGroups=true
+#ProtectHostname=true
+#ProtectKernelLogs=true
+#ProtectKernelModules=true
+#ProtectKernelTunables=true
+#ProtectSystem=full
+#RestrictNamespaces=true
+#RestrictRealtime=true
