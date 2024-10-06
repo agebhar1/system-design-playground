@@ -2,3 +2,4 @@
 dependencies:
   - role: njs
   - role: owasp_modsecurity_crs
+  - role: quickjs

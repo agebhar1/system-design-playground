@@ -84,7 +84,7 @@
 - name: Get current configuration hash.
   ansible.builtin.set_fact:
     nginx_build_configuration_hash_current: |-
-      v1:{{
+      v2:{{
         (nginx_build_configuration + ['nginx_modsecurity_debug=' + (nginx_modsecurity_debug | string | lower)])
           | sort
           | ansible.builtin.md5
@@ -112,8 +112,8 @@
         chdir: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}"
       vars:
         configuration:
-          - --with-cc-opt=-I/usr/include -I{{ nginx_user_home }}/include {{ '-DMODSECURITY_DDEBUG=1' if nginx_modsecurity_debug }}
-          - --with-ld-opt=-L/usr/lib64 -L{{ nginx_user_home }}/lib -ldl -Wl,-rpath,/usr/lib64
+          - --with-cc-opt=-I/usr/include -I{{ nginx_user_home }}/include -I{{ nginx_user_home }}/include/quickjs {{ '-DMODSECURITY_DDEBUG=1' if nginx_modsecurity_debug }} # yamllint disable rule:line-length
+          - --with-ld-opt=-L/usr/lib64 -L{{ nginx_user_home }}/lib -L{{ nginx_user_home }}/lib/quickjs -ldl -Wl,-rpath,/usr/lib64
           - --conf-path={{ nginx_user_home }}/etc/nginx/nginx.conf
           - --error-log-path={{ nginx_user_home }}/var/log/nginx/error.log
           - --http-client-body-temp-path={{ nginx_user_home }}/var/run/nginx/client_body_temp
