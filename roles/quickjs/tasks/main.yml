@@ -4,6 +4,7 @@
     name:
       - gcc
       - make
+      - tar
       - xz
     state: present
   become: true
@@ -15,40 +16,31 @@
     mode: "0700"
   loop:
     - { dest: "{{ quickjs_src_directory }}/download" }
-    - { dest: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_version }}" }
+    - { dest: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_github_hash or quickjs_version }}" }
     - { dest: "{{ quickjs_user_home }}/bin" }
     - { dest: "{{ quickjs_user_home }}/include/quickjs" }
     - { dest: "{{ quickjs_user_home }}/lib/quickjs" }
 
-- name: Ensure »QuickJS« source is present.
-  ansible.builtin.get_url:
-    url: https://bellard.org/quickjs/quickjs-{{ quickjs_version }}.tar.xz
-    dest: "{{ quickjs_src_directory }}/download/quickjs-{{ quickjs_version }}.tar.xz"
-    checksum: "{{ quickjs_checksum }}"
-    mode: "0600"
+- ansible.builtin.include_tasks: source-github.yml # noqa: name[missing]
+  when: quickjs_github_hash
 
-- name: Ensure »»QuickJS«« source is extracted.
-  ansible.builtin.unarchive:
-    src: "{{ quickjs_src_directory }}/download/quickjs-{{ quickjs_version }}.tar.xz"
-    dest: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_version }}"
-    remote_src: true
-    extra_opts:
-      - --strip-components=1
-    mode: u=rwX,g=,o=
+- ansible.builtin.include_tasks: source-website.yml # noqa: name[missing]
+  when: quickjs_version
 
 - name: Ensure artifacts are build.
   community.general.make:
-    chdir: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_version }}"
+    chdir: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_github_hash or quickjs_version }}"
     jobs: "{{ (ansible_processor_nproc * 0.75) | round(0, 'floor') | int }}"
     params:
       PREFIX: "{{ quickjs_user_home }}"
+      CONFIG_LTO: "y"
   register: quickjs_make
 
 - name: Ensure binary artifacts are striped.
   # noqa: no-handler
   ansible.builtin.command:
     argv: ["strip", "{{ item }}"]
-    chdir: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_version }}"
+    chdir: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_github_hash or quickjs_version }}"
   loop:
     - qjs
     - qjsc
@@ -57,7 +49,7 @@
 
 - name: Ensure artifacts are present.
   ansible.builtin.copy:
-    src: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_version }}/{{ item.src }}"
+    src: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_github_hash or quickjs_version }}/{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: "{{ item.mode }}"
     remote_src: true

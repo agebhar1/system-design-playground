@@ -1,0 +1,16 @@
+---
+- name: Ensure »QuickJS« website source is present.
+  ansible.builtin.get_url:
+    url: https://bellard.org/quickjs/quickjs-{{ quickjs_version }}.tar.xz
+    dest: "{{ quickjs_src_directory }}/download/quickjs-{{ quickjs_version }}.tar.xz"
+    checksum: "{{ quickjs_checksum }}"
+    mode: "0600"
+
+- name: Ensure »»QuickJS«« website source is extracted.
+  ansible.builtin.unarchive:
+    src: "{{ quickjs_src_directory }}/download/quickjs-{{ quickjs_version }}.tar.xz"
+    dest: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_version }}"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    mode: u=rwX,g=,o=
