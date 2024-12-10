@@ -1,5 +1,6 @@
 ---
 name: Linting
+permissions: {}
 
 on: [push]
 jobs:
