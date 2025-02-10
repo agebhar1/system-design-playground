@@ -1,4 +1,4 @@
 ansible==11.2.0
-ansible-lint==25.1.1
+ansible-lint==25.1.2
 jmespath==1.0.1
 yamllint==1.35.1
