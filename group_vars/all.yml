@@ -8,8 +8,8 @@ njs_checksum: sha256:61365eea69c6862fc8a5b5df531503ae49499f6bcd5af932496b84850a2
 modsecurity_version: 3.0.14
 modsecurity_checksum: sha256:f7599057b35e67ab61764265daddf9ab03c35cee1e55527547afb073ce8f04e8
 
-modsecurity_nginx_version: 1.0.3
-modsecurity_nginx_checksum: sha256:ae811c7208ac029cb7a99d6f63e03d3971797607517187f47620df39c1f78add
+modsecurity_nginx_version: 1.0.4
+modsecurity_nginx_checksum: sha256:6bdc7570911be884c1e43aaf85046137f9fde0cfa0dd4a55b853c81c45a13313
 
 owasp_modsecurity_crs_version: 3.3.7
 owasp_modsecurity_crs_checksum: sha256:e2e8ed9f72e802d5b54407f6ffd6930225955762f3ef297ee5ef8ec38305be89
