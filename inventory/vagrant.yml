@@ -8,8 +8,9 @@ all:
       ansible_python_interpreter: /usr/bin/python3.11
       vagrant:
         vm:
-          box: opensuse/Leap-15.6.x86_64
-          box_version: 15.6.13.356
+          box: Leap-15.6.x86_64
+          box_url: https://download.opensuse.org/distribution/leap/15.6/appliances/boxes/Leap-15.6.x86_64.json
+          box_version: 15.6.17.1
           cpus: 3
           memory: 4096
           gui: false
@@ -21,7 +22,8 @@ all:
       ansible_python_interpreter: /usr/bin/python3.11
       vagrant:
         vm:
-          box: opensuse/Leap-15.5.x86_64
+          box: Leap-15.5.x86_64
+          box_url: https://download.opensuse.org/distribution/leap/15.5/appliances/boxes/Leap-15.5.x86_64.json
           box_version: 15.5.13.309
           cpus: 3
           memory: 4096

@@ -12,6 +12,7 @@ Vagrant.configure("2") do |config|
       vm = host_config.dig('vagrant', 'vm')
 
       node.vm.box = vm['box']
+      node.vm.box_url = vm['box_url'] if vm.has_key?('box_url')
       node.vm.box_version = vm['box_version'] if vm.has_key?('box_version')
       node.vm.hostname = hostname
       node.vm.network :private_network, ip: host_config['ansible_host']
