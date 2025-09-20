@@ -22,10 +22,10 @@
     - { dest: "{{ quickjs_user_home }}/lib/quickjs" }
 
 - ansible.builtin.include_tasks: source-github.yml # noqa: name[missing]
-  when: quickjs_github_hash
+  when: quickjs_github_hash != None
 
 - ansible.builtin.include_tasks: source-website.yml # noqa: name[missing]
-  when: quickjs_version
+  when: quickjs_version != None
 
 - name: Ensure artifacts are build.
   community.general.make:
