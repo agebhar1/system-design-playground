@@ -10,7 +10,7 @@ all:
         vm:
           box: Leap-15.6.x86_64
           box_url: https://download.opensuse.org/distribution/leap/15.6/appliances/boxes/Leap-15.6.x86_64.json
-          box_version: 15.6.17.26
+          box_version: 15.6.19.10
           cpus: 3
           memory: 4096
           gui: false
