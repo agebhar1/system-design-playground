@@ -1,5 +1,5 @@
 ---
-logrotate_user: "{{ ansible_user }}"
-logrotate_user_home: "{{ ansible_user_dir }}"
+logrotate_user: "{{ ansible_facts['user_id'] }}"
+logrotate_user_home: "{{ ansible_facts['user_dir'] }}"
 
 logrotate_rotate: 14

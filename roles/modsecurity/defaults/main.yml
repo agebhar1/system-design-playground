@@ -2,8 +2,8 @@
 modsecurity_version: null
 modsecurity_checksum: null
 
-modsecurity_user: "{{ ansible_user }}"
-modsecurity_user_home: "{{ ansible_user_dir }}"
+modsecurity_user: "{{ ansible_facts['user_id'] }}"
+modsecurity_user_home: "{{ ansible_facts['user_dir'] }}"
 modsecurity_src_directory: "{{  modsecurity_user_home }}/src"
 modsecurity_dist_directory: "{{  modsecurity_user_home }}"
 

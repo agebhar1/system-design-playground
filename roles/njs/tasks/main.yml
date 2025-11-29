@@ -58,7 +58,7 @@
 - name: Ensure artifacts are build.
   community.general.make:
     chdir: "{{ njs_src_directory }}/njs/{{ njs_version }}"
-    jobs: "{{ (ansible_processor_nproc * 0.75) | round(0, 'floor') | int }}"
+    jobs: "{{ (ansible_facts['processor_nproc'] * 0.75) | round(0, 'floor') | int }}"
 
 - name: Ensure »njs« is present.
   ansible.builtin.copy:

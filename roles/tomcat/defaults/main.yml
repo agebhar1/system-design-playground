@@ -4,8 +4,8 @@ tomcat_checksum: null
 tomcat_java_version: null
 tomcat_java_checksum: null
 
-tomcat_user: "{{ ansible_user }}"
-tomcat_user_home: "{{ ansible_user_dir }}"
+tomcat_user: "{{ ansible_facts['user_id'] }}"
+tomcat_user_home: "{{ ansible_facts['user_dir'] }}"
 tomcat_src_directory: "{{ tomcat_user_home }}/src"
 
 tomcat_port: 8081

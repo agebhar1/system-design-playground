@@ -2,8 +2,8 @@
 owasp_modsecurity_crs_version: null
 owasp_modsecurity_crs_checksum: null
 
-owasp_modsecurity_crs_user: "{{ ansible_user }}"
-owasp_modsecurity_crs_user_home: "{{ ansible_user_dir }}"
+owasp_modsecurity_crs_user: "{{ ansible_facts['user_id'] }}"
+owasp_modsecurity_crs_user_home: "{{ ansible_facts['user_dir'] }}"
 owasp_modsecurity_crs_src_directory: "{{ owasp_modsecurity_crs_user_home }}/src"
 owasp_modsecurity_crs_rules:
   - REQUEST-901-INITIALIZATION

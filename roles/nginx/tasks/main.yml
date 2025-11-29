@@ -136,7 +136,7 @@
 - name: Ensure artifacts are build.
   community.general.make:
     chdir: "{{ nginx_src_directory }}/nginx/{{ nginx_version }}"
-    jobs: "{{ (ansible_processor_nproc * 0.75) | round(0, 'floor') | int }}"
+    jobs: "{{ (ansible_facts['processor_nproc'] * 0.75) | round(0, 'floor') | int }}"
   register: nginx_make
 
 - name: Ensure artifacts are present.

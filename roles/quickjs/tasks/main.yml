@@ -30,7 +30,7 @@
 - name: Ensure artifacts are build.
   community.general.make:
     chdir: "{{ quickjs_src_directory }}/quickjs/{{ quickjs_github_hash or quickjs_version }}"
-    jobs: "{{ (ansible_processor_nproc * 0.75) | round(0, 'floor') | int }}"
+    jobs: "{{ (ansible_facts['processor_nproc'] * 0.75) | round(0, 'floor') | int }}"
     params:
       PREFIX: "{{ quickjs_user_home }}"
       CONFIG_LTO: "y"

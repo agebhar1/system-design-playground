@@ -2,8 +2,8 @@
 nginx_version: null
 nginx_checksum: null
 
-nginx_user: "{{ ansible_user }}"
-nginx_user_home: "{{ ansible_user_dir }}"
+nginx_user: "{{ ansible_facts['user_id'] }}"
+nginx_user_home: "{{ ansible_facts['user_dir'] }}"
 nginx_src_directory: "{{ nginx_user_home }}/src"
 
 nginx_build_configuration:

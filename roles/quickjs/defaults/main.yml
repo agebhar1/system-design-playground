@@ -4,6 +4,6 @@ quickjs_github_hash: null
 quickjs_version: null
 quickjs_checksum: null
 
-quickjs_user: "{{ ansible_user }}"
-quickjs_user_home: "{{ ansible_user_dir }}"
+quickjs_user: "{{ ansible_facts['user_id'] }}"
+quickjs_user_home: "{{ ansible_facts['user_dir'] }}"
 quickjs_src_directory: "{{ quickjs_user_home }}/src"
