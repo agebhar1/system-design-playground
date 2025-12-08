@@ -12,8 +12,8 @@
   ansible.builtin.command: "{{ nginx_user_home }}/sbin/nginx -t"
   environment:
     LD_LIBRARY_PATH: "{{ nginx_user_home }}/lib"
-  register: result
-  changed_when: "result.rc != 0"
+  register: nginx_result
+  changed_when: "nginx_result.rc != 0"
   check_mode: false
 
 - name: Reload Nginx user service after configuration check
