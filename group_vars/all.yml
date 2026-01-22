@@ -19,5 +19,5 @@ quickjs_checksum: sha256:0364fd5136857117c8204c2f0c203b71b25b9f025dc1a0605ea51f0
 
 tomcat_version: 11.0.15
 tomcat_checksum: sha512:876beac5138cf8277f30fe8f6b519fcdd0bfe3d8ca3d20f734cab0f83e9b2e83de9395ee71052c2604f29f700d9646eddaeec72da5807a2d7edea3936096c742
-tomcat_java_version: zulu25.30.17-ca-jre25.0.1
-tomcat_java_checksum: sha256:d0a4bd1124d95a2a6c78f1a3b5289310023b9cd49b5c151c6875092c5470b21f
+tomcat_java_version: zulu25.32.17-ca-jre25.0.2
+tomcat_java_checksum: sha256:f32ceb10f61aaf49b22ec34fff8cd0377c2b3aef33b8d59a15952123a91ea0a1
