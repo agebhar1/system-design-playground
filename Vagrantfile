@@ -33,4 +33,7 @@ $provision_privileged = <<-SCRIPT
 zypper refresh
 zypper --non-interactive install python311
 
+if grep --silent 'cpe:/o:opensuse:leap:15.6' /etc/os-release; then
+  zypper --non-interactive install --oldpackage libncurses6=6.1-150000.5.30.1
+fi
 SCRIPT
