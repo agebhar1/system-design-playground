@@ -5,8 +5,8 @@ nginx_checksum: sha256:4261dc90e9e47c1c4041276e9aaa3d48ebe2e664f728e14fa95ae6c67
 njs_version: 1.0.0
 njs_checksum: sha256:56fe6560549cbcb7fb5740534b541bb153250d8772aa16ac18bc30eb0cc498dd
 
-modsecurity_version: 3.0.15
-modsecurity_checksum: sha256:c276c838df6b61d96aa52075aee17d426af52755e16d09edca9f9d718696fda7
+modsecurity_version: 3.0.16
+modsecurity_checksum: sha256:739be3c71b1939f14e91afe1eeae654acbd440da11bd29790458840bc315b4c0
 
 modsecurity_nginx_version: 1.0.4
 modsecurity_nginx_checksum: sha256:6bdc7570911be884c1e43aaf85046137f9fde0cfa0dd4a55b853c81c45a13313
