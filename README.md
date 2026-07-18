@@ -19,13 +19,17 @@ font-family: Tahoma, Verdana, Arial, sans-serif; }
 </head>
 <body>
 <h1>Welcome to nginx!</h1>
-<p>If you see this page, the nginx web server is successfully installed and
-working. Further configuration is required.</p>
+<p>If you see this page, nginx is successfully installed and working.
+Further configuration is required for the web server, reverse proxy,
+API gateway, load balancer, content cache, or other features.</p>
 
 <p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
-Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
+<a href="https://nginx.org/">nginx.org</a>.<br/>
+To engage with the community please visit
+<a href="https://community.nginx.org/">community.nginx.org</a>.<br/>
+For enterprise grade support, professional services, additional
+security features and capabilities please refer to
+<a href="https://f5.com/nginx">f5.com/nginx</a>.</p>
 
 <p><em>Thank you for using nginx.</em></p>
 </body>
@@ -36,7 +40,7 @@ $ curl -H 'User-Agent: nessus' -H 'X-Request-ID: 1' 192.168.56.{2,3}
 <head><title>403 Forbidden</title></head>
 <body>
 <center><h1>403 Forbidden</h1></center>
-<hr><center>nginx/1.26.3</center>
+<hr><center>nginx/1.30.4</center>
 </body>
 </html>
 …
